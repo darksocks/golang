@@ -9,7 +9,8 @@ import (
 //SocksProxy is an implementation of socks5 proxy
 type SocksProxy struct {
 	net.Listener
-	Dialer func(uri string, raw io.ReadWriteCloser) (sid uint64, err error)
+	Dialer       func(uri string, raw io.ReadWriteCloser) (sid uint64, err error)
+	HTTPUpstream string
 }
 
 //NewSocksProxy will return new SocksProxy
@@ -62,7 +63,20 @@ func (s *SocksProxy) procConn(conn net.Conn) {
 		return
 	}
 	if buf[0] != 0x05 {
-		err = fmt.Errorf("only ver 0x05 is supported, but %x", buf[0])
+		if len(s.HTTPUpstream) < 1 {
+			err = fmt.Errorf("only ver 0x05 is supported, but %x", buf[0])
+			return
+		}
+		DebugLog("SocksProxy proxy connection to http upstream(%v) from %v", s.HTTPUpstream, conn.RemoteAddr())
+		var up net.Conn
+		up, err = net.Dial("tcp", s.HTTPUpstream)
+		if err != nil {
+			return
+		}
+		go io.Copy(conn, up)
+		up.Write(buf[:2])
+		buf = nil
+		_, err = io.Copy(up, conn)
 		return
 	}
 	err = fullBuf(conn, buf[2:], uint32(buf[1]))
