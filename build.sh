@@ -12,8 +12,8 @@ echo "Installing Dependence"
 #########Running Test#########
 echo "Running Test"
 pkgs="\
- github.com/darksocks/darksocks/ds\
- github.com/darksocks/darksocks\
+ github.com/darksocks/golang/ds\
+ github.com/darksocks/golang/darksocks\
 "
 
 echo "mode: set" > a.out

@@ -20,8 +20,10 @@ var BasePipe = os.Pipe
 //PipedConn is connection piped read and write
 type PipedConn struct {
 	io.Reader
+	rWriter io.Writer
 	io.Writer
-	Alias string
+	wReader io.Reader
+	Alias   string
 }
 
 //CreatePipeConn will create pipe connection
@@ -32,26 +34,29 @@ func CreatePipeConn() (a, b *PipedConn, err error) {
 	}
 	bReader, aWriter, err := BasePipe()
 	if err != nil {
-		aReader.Close()
 		bWriter.Close()
 		return
 	}
 	a = &PipedConn{
-		Reader: aReader,
-		Writer: aWriter,
-		Alias:  fmt.Sprintf("%v,%v", aReader, aWriter),
+		Reader:  aReader,
+		rWriter: bWriter,
+		Writer:  aWriter,
+		wReader: bReader,
+		Alias:   fmt.Sprintf("%v,%v", aReader, aWriter),
 	}
 	b = &PipedConn{
-		Reader: bReader,
-		Writer: bWriter,
-		Alias:  fmt.Sprintf("%v,%v", bReader, bWriter),
+		Reader:  bReader,
+		rWriter: aWriter,
+		Writer:  bWriter,
+		wReader: aReader,
+		Alias:   fmt.Sprintf("%v,%v", bReader, bWriter),
 	}
 	return
 }
 
 //Close will close Reaer/Writer
 func (p *PipedConn) Close() (err error) {
-	if closer, ok := p.Reader.(io.Closer); ok {
+	if closer, ok := p.rWriter.(io.Closer); ok {
 		err = closer.Close()
 	}
 	if closer, ok := p.Writer.(io.Closer); ok {

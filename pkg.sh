@@ -17,7 +17,7 @@ rm -rf $srv_out
 mkdir -p $srv_out
 ##build normal
 echo "Build $srv_name normal executor..."
-go build -o $srv_out/$srv_name github.com/darksocks/darksocks
+go build -o $srv_out/$srv_name github.com/darksocks/golang/darksocks
 cp -f darksocks-install.sh $srv_out
 cp -f cert.sh $srv_out
 cp -f darksocks.service $srv_out

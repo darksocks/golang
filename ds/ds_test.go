@@ -15,7 +15,13 @@ import (
 	"time"
 
 	"golang.org/x/net/websocket"
+
+	_ "net/http/pprof"
 )
+
+func init() {
+	go http.ListenAndServe("localhost:6060", nil)
+}
 
 func TestConn(t *testing.T) {
 	//
@@ -208,6 +214,7 @@ func TestDarkSocket(t *testing.T) {
 		client.Close()
 		time.Sleep(time.Millisecond)
 		serverChannel.Close()
+		fmt.Println("---->normal process done")
 	}
 	{ //http process
 		//
@@ -243,9 +250,12 @@ func TestDarkSocket(t *testing.T) {
 		fmt.Println(err, string(res))
 		//
 		time.Sleep(time.Millisecond)
+		fmt.Println("closing server remote")
 		serverRemote.Close()
 		time.Sleep(time.Millisecond)
+		fmt.Println("closing server channel")
 		serverChannel.Close()
+		fmt.Println("---->http process done")
 	}
 	{ //server dial error
 		//
@@ -299,6 +309,7 @@ func TestDarkSocket(t *testing.T) {
 		//
 		time.Sleep(time.Millisecond)
 		serverChannel.Close()
+		fmt.Println("---->server dial error done")
 	}
 	{ //client dialer error
 		client := NewClient(256*1024, DialerF(func(remote string) (raw io.ReadWriteCloser, err error) {
@@ -311,6 +322,7 @@ func TestDarkSocket(t *testing.T) {
 			t.Error(err)
 			return
 		}
+		fmt.Println("---->client dial error done")
 	}
 	{ //server proc error
 		remoteConn := NewErrMockConn(1, 1)
@@ -342,6 +354,7 @@ func TestDarkSocket(t *testing.T) {
 			t.Error(err)
 			return
 		}
+		fmt.Println("---->server proc error done")
 	}
 	{ //client proc error
 		//write channel command error
@@ -410,6 +423,7 @@ func TestDarkSocket(t *testing.T) {
 		// 	t.Error(err)
 		// 	return
 		// }
+		fmt.Println("---->client proc error done")
 	}
 	//
 	wait.Wait()

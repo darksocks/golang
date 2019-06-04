@@ -7,7 +7,7 @@ mkdir build
 mkdir build\%srv_name%
 set GOOS=windows
 set GOARCH=%1
-go build -o build\%srv_name%\darksocks.exe github.com/darksocks/darksocks
+go build -o build\%srv_name%\darksocks.exe github.com/darksocks/golang/darksocks
 if NOT %ERRORLEVEL% EQU 0 goto :efail
 xcopy win-%OS%\nssm.exe build\%srv_name%
 xcopy cert.bat build\%srv_name%

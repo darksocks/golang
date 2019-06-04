@@ -68,6 +68,39 @@ func TestPipeConn(t *testing.T) {
 	}
 }
 
+func TestPipeConnClose(t *testing.T) {
+	BasePipe = os.Pipe
+	wait := make(chan int)
+	//
+	a, b, err := CreatePipeConn()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	go func() {
+		buf := make([]byte, 1024)
+		a.Read(buf)
+		wait <- 1
+	}()
+	a.Close()
+	b.Close()
+	<-wait
+	//
+	a, b, err = CreatePipeConn()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	go func() {
+		buf := make([]byte, 1024)
+		a.Read(buf)
+		wait <- 1
+	}()
+	b.Close()
+	a.Close()
+	<-wait
+}
+
 func TestLog(t *testing.T) {
 	//
 	SetLogLevel(LogLevelDebug)
